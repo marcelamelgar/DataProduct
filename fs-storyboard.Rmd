@@ -1,0 +1,46 @@
+---
+title: "Storyboard"
+output: 
+  flexdashboard::flex_dashboard:
+    storyboard: true
+---
+
+```{r Librerias}
+library(dplyr)
+library(ggplot2)
+```
+
+### Data set de iris
+
+```{r Data}
+knitr::kable(iris %>% sample_n(50))
+```
+
+***
+Este es el dataset utilizando el analisis
+
+### Sepal with Width by Species
+
+```{r}
+iris %>%
+  ggplot(aes(x = Species, y = Sepal.Width, color = Species)) +
+  geom_boxplot()
+```
+
+***
+Box plot sobre como esta distribuido el sepal length por species
+
+### Histograma
+
+```{r}
+iris %>% 
+  ggplot(aes(x = Sepal.Width,
+             y = ..density..,
+             color = Species)) + 
+  geom_histogram() +
+  geom_density() +
+  facet_wrap(.~Species)
+```
+
+***
+Histograma mas cool que han visto en su vida
