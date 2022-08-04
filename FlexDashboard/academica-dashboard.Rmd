@@ -1,0 +1,77 @@
+---
+title: "Dashboard"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(readr)
+library(dplyr)
+```
+
+```{r data}
+academatica_videos <- read_csv("data/academatica_videos.csv")
+academatica_videos_metadata <- read_csv("data/academatica_videos_metadata.csv")
+academatica_video_stats <- read_csv("data/academatica_video_stats.csv")
+```
+
+```{r kpis}
+metricas <- academatica_video_stats %>%
+  summarise(tot_views = sum(viewCount),
+            tot_likes = sum(likeCount),
+            tot_dislikes = sum(dislikeCount),
+            tot_favorite = sum(favoriteCount),
+            tot_comments = sum(commentCount))
+```
+
+
+# Metricas {data-icon=fa-ruler}
+
+##
+
+### Reproducciones
+
+```{r}
+valueBox(metricas$tot_views, icon = 'fa-eye', color = "success")
+```
+
+
+### Likes
+
+```{r}
+valueBox(metricas$tot_likes, icon = 'fa-thumbs-up', color = "warning")
+```
+
+### Comments
+
+```{r}
+valueBox(metricas$tot_comments, icon = 'fa-comment', color = "danger")
+```
+
+##
+
+### Total Likes
+
+```{r}
+rlikes <- metricas$tot_likes / (metricas$tot_likes+metricas$tot_dislikes)
+rlikes <- round(rlikes, 2) * 100
+gauge(rlikes, min=0, max=100, symbol = '%', 
+      gaugeSectors(success = c(80,100), warning = c(40,79), danger = c(0,39)))
+```
+
+
+### Total Dislikes
+
+```{r}
+rlikes <- metricas$tot_dislikes / (metricas$tot_likes+metricas$tot_dislikes)
+rlikes <- round(rlikes, 2) * 100
+gauge(rlikes, min=0, max=100, symbol = '%', 
+      gaugeSectors(success = c(0,39), warning = c(40,79), danger = c(80,100)))
+```
+
+##
+
+###
