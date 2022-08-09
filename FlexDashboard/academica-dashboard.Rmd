@@ -10,6 +10,12 @@ output:
 library(flexdashboard)
 library(readr)
 library(dplyr)
+library(formattable)
+library(ggplot2)
+library(lubridate)
+library(DT)
+library(tm)
+library(wordcloud)
 ```
 
 ```{r data}
@@ -35,20 +41,23 @@ metricas <- academatica_video_stats %>%
 ### Reproducciones
 
 ```{r}
-valueBox(metricas$tot_views, icon = 'fa-eye', color = "success")
+fviews <- comma(metricas$tot_views, digits = 0)
+valueBox(fviews, icon = 'fa-eye', color = "success")
 ```
 
 
 ### Likes
 
 ```{r}
-valueBox(metricas$tot_likes, icon = 'fa-thumbs-up', color = "warning")
+flikes <- comma(metricas$tot_likes, digits = 0)
+valueBox(flikes, icon = 'fa-thumbs-up', color = "warning")
 ```
 
 ### Comments
 
 ```{r}
-valueBox(metricas$tot_comments, icon = 'fa-comment', color = "danger")
+fcomments <- comma(metricas$tot_comments, digits = 0)
+valueBox(fcomments, icon = 'fa-comment', color = "danger")
 ```
 
 ##
@@ -72,6 +81,74 @@ gauge(rlikes, min=0, max=100, symbol = '%',
       gaugeSectors(success = c(0,39), warning = c(40,79), danger = c(80,100)))
 ```
 
+
 ##
 
-###
+### Total de Videos Subidos
+
+```{r, fig.width = 20}
+academatica_videos %>%
+  mutate(year = year(ymd_hms(contentDetails.videoPublishedAt)),
+         month = month(ymd_hms(contentDetails.videoPublishedAt)),
+         year = as.factor(year),
+         month = as.factor(month)
+         ) %>%
+  group_by(year, month) %>%
+  summarise(uploaded_videos = n()) %>%
+  ggplot(aes(x = month, y = uploaded_videos, fill = year)) +
+  geom_col(position = 'dodge') +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  facet_grid(~year)
+```
+
+# Data {data-icon=fa-database}
+
+## {.tabset}
+
+### Data
+
+```{r}
+academatica_video_stats %>%
+  left_join(academatica_videos_metadata, by = c('id' = 'video_id')) %>%
+  select(id, title, description, viewCount, likeCount) %>%
+  datatable()
+```
+
+
+### Wordcloud
+
+```{r}
+docs <- Corpus(VectorSource(academatica_videos_metadata$title))
+toSpace <- content_transformer(function (x , pattern ) gsub(pattern, " ", x))
+docs <- tm_map(docs, toSpace, "-")
+docs <- tm_map(docs, toSpace, "\\(")
+docs <- tm_map(docs, toSpace, "\\)")
+docs <- tm_map(docs, toSpace, "\\|")
+
+docs <- tm_map(docs, content_transformer(tolower))
+docs <- tm_map(docs, removeNumbers)
+docs <- tm_map(docs, removeWords, stopwords("spanish"))
+
+docs <- tm_map(docs, removeWords, c("video", 
+                                    "problema",
+                                    "ejemplo",
+                                    "parte",
+                                    "ejercicio",
+                                    "ejercicios",
+                                    "ejemplos")) 
+
+docs <- tm_map(docs, removePunctuation)
+docs <- tm_map(docs, stripWhitespace)
+
+dtm <- TermDocumentMatrix(docs)
+m <- as.matrix(dtm)
+v <- sort(rowSums(m),decreasing=TRUE)
+d <- data.frame(word = names(v),freq=v)
+
+set.seed(1234)
+
+wordcloud(words = d$word, freq = d$freq, min.freq = 1,
+          max.words=100, random.order=TRUE, rot.per=0.1, 
+          colors=brewer.pal(8, "Dark2"))
+```
+
