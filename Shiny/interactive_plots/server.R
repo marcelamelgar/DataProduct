@@ -1,35 +1,27 @@
 library(shiny)
 library(ggplot2)
 library(dplyr)
+library(plotly)
 
 shinyServer(function(input, output) {
   
-  output$grafica_base_r <- renderPlot({
-    plot(mtcars$wt,mtcars$mpg, xlab = "wt", ylab="millas por galon")
-    
-  })
+  clicks <<- data.frame(matrix(ncol = 2, nrow = 0))
+  x <- c("x", "y")
+  colnames(clicks) <- x
+
   
-  
-  output$grafica_ggplot <- renderPlot({
-    diamonds %>%
-      ggplot(aes(x=carat,y=price,color=color))+
-      geom_point()+
-      ylab("Precio")+
-      xlab("Kilates")+
-      ggtitle("Precio de Diamantes por kilate")
-  })
-  
-  
-  
+  clicked <- function(punto){
+    clicks[nrow(clicks) + 1,] = c(input$clk$x,input$clk$y)
+    print(clicks)
+  }
+
   output$click_data <- renderPrint({
     clk_msg <- NULL
     dclk_msg<- NULL
     mhover_msg <- NULL
     mbrush_msg <- NULL
     if(!is.null(input$clk$x) ){
-      clk_msg<-
-        paste0("click cordenada x= ", round(input$clk$x,2), 
-               " click coordenada y= ", round(input$clk$y,2))
+      clicked(input$clk)
     }
     if(!is.null(input$dclk$x) ){
       dclk_msg<-paste0("doble click cordenada x= ", round(input$dclk$x,2), 
@@ -71,7 +63,6 @@ shinyServer(function(input, output) {
   
   
   output$plot_click_options <- renderPlot({
-    
     plot(mtcars$wt,mtcars$mpg, xlab = "wt", ylab="millas por galon")
   })
   
