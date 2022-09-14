@@ -46,7 +46,7 @@ shinyServer(function(input, output, session) {
   })
   
   brushed <- reactive({
-    punto <- brushedPoints(mtcars, input$mhover, xvar = 'wt', yvar = 'mpg')
+    punto <- brushedPoints(mtcars, input$mbrush, xvar = 'wt', yvar = 'mpg')
     if(is.null(punto)){
       return(NULL)
     }
@@ -63,12 +63,12 @@ shinyServer(function(input, output, session) {
   
   output$plot_click_options <- renderPlot({
     plot(mtcars$wt,mtcars$mpg, xlab = "wt", ylab="millas por galon", col = "black", pch = 21)
+    df3<- hovering()
+    points(df3$wt, df3$mpg, col =  "gray", pch = 21)
     df <- clicked()
     points(df$wt, df$mpg, col = "green", pch = 21)
     df2 <- dbclicked()
     points(df2$wt, df2$mpg, col = "black", pch = 21)
-    df3<- hovering()
-    points(df3$wt, df3$mpg, col =  "gray", pch = 21)
     df4 <- brushed()
     points(df4$wt, df4$mpg, col =  "blue", pch = 21)
   })
