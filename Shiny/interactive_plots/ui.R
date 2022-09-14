@@ -4,18 +4,19 @@ library(shiny)
 shinyUI(fluidPage(
   
   # Application title
-  titlePanel("Graficas y mas"),
+  titlePanel("Interaccion con Puntos"),
   
   # Sidebar with a slider input for number of bins
   shiny::tabsetPanel(
-    tabPanel("Plot Interactions",
+    tabPanel("Colores Reactivos",
              plotOutput("plot_click_options",
                         click = "clk",
                         dblclick = "dclk",
                         hover = 'mhover',
                         brush = 'mbrush' ),
-             verbatimTextOutput("click_data"),
-             tableOutput("mtcars_tbl")
+             h3("Informacion de Puntos Seleccionados"),
+             DT::dataTableOutput("clicks_datos"),
+             DT::dataTableOutput("dbclicks_datos")
     )
     
   )
