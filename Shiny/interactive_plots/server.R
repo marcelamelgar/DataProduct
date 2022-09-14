@@ -8,9 +8,11 @@ shinyServer(function(input, output, session) {
   clicks <<- as.data.frame(id = character(),
                            x = double(),
                            y = double())
+  
   dbclicks <<- as.data.frame(id = character(),
                            x = double(),
                            y = double())
+  
   mousehover <<- as.data.frame(id = character(),
                                x = double(),
                                y = double())
@@ -19,13 +21,15 @@ shinyServer(function(input, output, session) {
                            x = double(),
                            y = double())
   
+  final <<- as.data.frame(id = character(),
+                          x = double(),
+                          y = double())
+  
   clicked <- reactive({
     punto <- nearPoints(mtcars, input$clk, xvar = 'wt', yvar = 'mpg')
     if(is.null(punto)){
       return(NULL)
     }
-    #punto  <- punto %>%
-    #  select(wt,mpg)
     clicks <<- rbind(clicks,punto)
   })
   
@@ -52,6 +56,10 @@ shinyServer(function(input, output, session) {
     }
     sbrush <<- rbind(sbrush, punto)
   })
+  
+  #tableclicked <- reactive({
+  #  final <<- setdiff(clicked(),dbclicked())
+  #})
 
   output$clicks_datos <- DT::renderDataTable({
     DT::datatable(clicked())
@@ -65,12 +73,12 @@ shinyServer(function(input, output, session) {
     plot(mtcars$wt,mtcars$mpg, xlab = "wt", ylab="millas por galon", col = "black", pch = 21)
     df3<- hovering()
     points(df3$wt, df3$mpg, col =  "gray", pch = 21)
+    df4 <- brushed()
+    points(df4$wt, df4$mpg, col =  "blue", pch = 21)
     df <- clicked()
     points(df$wt, df$mpg, col = "green", pch = 21)
     df2 <- dbclicked()
     points(df2$wt, df2$mpg, col = "black", pch = 21)
-    df4 <- brushed()
-    points(df4$wt, df4$mpg, col =  "blue", pch = 21)
   })
   
   

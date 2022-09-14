@@ -14,8 +14,9 @@ shinyUI(fluidPage(
                         dblclick = "dclk",
                         hover = 'mhover',
                         brush = 'mbrush' ),
-             h3("Informacion de Puntos Seleccionados"),
+             h3("Informacion de Puntos 'Clicked'"),
              DT::dataTableOutput("clicks_datos"),
+             h3("Información de Puntos Seleccionados"),
              DT::dataTableOutput("dbclicks_datos")
     )
     
