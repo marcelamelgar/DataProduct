@@ -21,9 +21,9 @@ shinyServer(function(input, output, session) {
                            x = double(),
                            y = double())
   
-  final <<- as.data.frame(id = character(),
-                          x = double(),
-                          y = double())
+  #final <<- as.data.frame(id = character(),
+  #                        x = double(),
+  #                        y = double())
   
   clicked <- reactive({
     punto <- nearPoints(mtcars, input$clk, xvar = 'wt', yvar = 'mpg')
@@ -56,7 +56,7 @@ shinyServer(function(input, output, session) {
     }
     sbrush <<- rbind(sbrush, punto)
   })
-  
+
   #tableclicked <- reactive({
   #  final <<- setdiff(clicked(),dbclicked())
   #})
