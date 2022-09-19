@@ -40,11 +40,24 @@ shinyServer(function(input, output, session) {
   })
   
   hovering <- reactive({
-    punto <- nearPoints(mtcars, input$mhover, xvar = 'wt', yvar = 'mpg')
-    mousehover <<- rbind(mousehover, punto)
-    if(is.null(input$mhover)){
-      mousehover <<- mousehover %>%
-        filter(!rownames(mousehover) )
+    if(is.null(mousehover)){
+      punto <- nearPoints(mtcars, input$mhover, xvar = 'wt', yvar = 'mpg')
+      mousehover <<- rbind(mousehover, punto)
+      return(mousehover)
+    }
+    else{
+      punto <- nearPoints(mtcars, input$mhover, xvar = 'wt', yvar = 'mpg')
+      if(nrow(punto)==0){
+        return(mousehover)
+      }
+      mousehover <<- NULL
+      check <- clicked() %>%
+        filter_all(any_vars(. %in% c(rownames(punto))))
+      if(nrow(check) == 0){
+        mousehover <<- rbind(mousehover, punto)
+        return(mousehover)
+      }
+      return(mousehover)
     }
   })
   
@@ -69,6 +82,8 @@ shinyServer(function(input, output, session) {
   output$plot_click_options <- renderPlot({
     plot(mtcars$wt,mtcars$mpg, xlab = "wt", ylab="millas por galon", col = "black", pch = 21)
     points(input$mhover$x, input$mhover$y, col =  "gray", pch = 21)
+    df3 <- hovering()
+    points(df3$wt, df3$mpg, col =  "gray", pch = 21)
     df4 <- brushed()
     points(df4$wt, df4$mpg, col =  "blue", pch = 21)
     df <- clicked()
