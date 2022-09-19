@@ -51,12 +51,7 @@ shinyServer(function(input, output, session) {
         return(mousehover)
       }
       mousehover <<- NULL
-      check <- clicked() %>%
-        filter_all(any_vars(. %in% c(rownames(punto))))
-      if(nrow(check) == 0){
-        mousehover <<- rbind(mousehover, punto)
-        return(mousehover)
-      }
+      mousehover <<- rbind(mousehover, punto)
       return(mousehover)
     }
   })
