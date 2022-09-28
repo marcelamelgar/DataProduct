@@ -1,0 +1,22 @@
+---
+title: "Reporte Analítico"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(readr)
+library(dplyr)
+library(leaflet)
+library(crosstalk)
+library(DT)
+```
+
+```{r}
+tiendata <- read_csv("tienda.csv")
+tiendata
+```
+
