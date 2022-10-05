@@ -12,6 +12,10 @@ library(rpart)
 
 # Forward to Another Handdler
 
+# registra el log del usuario al momento de ingresar
+# manda su informacion y la guarda en un directorio en base al ano, mes, dia y hora en el que se ingreso
+# tambien guarda la informacion que fue ingresada para despues poder prseguir a ver si el usuario hubiera sobrevivido
+
 #* Log some information about the incoming request
 #* @filter logger
 function(req){
@@ -40,6 +44,8 @@ function(req){
 
 fit <- readRDS("modelo_final.rds")
 
+#parametros para la informacion del usuario
+
 #* Prediccion de Sobrevivencia de un Pasajero
 #* @param Pclass clase en el que viajabe el pasajero
 #* @param Sex Sexo del pasajero
@@ -50,6 +56,7 @@ fit <- readRDS("modelo_final.rds")
 #* @param Embarked puerto del que embarco
 #* @post /titanic
 
+# funcion que predice si el usuario que se ingresa hubiera sobrevivido el titanic o no
 function(Pclass, Sex, Age, SibSp, Parch, Fare, Embarked){
   features <- data_frame(Pclass = as.integer(Pclass),
                          Sex,

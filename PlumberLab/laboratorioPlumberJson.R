@@ -38,6 +38,7 @@ function(from, to){
 
 # Typed Dinamic Routes
 
+# aqui especifico el tipo de valor que se ingresa en la ruta
 #* @get /user/<id:int>
 function(id){
   list(
