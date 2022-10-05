@@ -5,7 +5,6 @@ library(dplyr)
 #* @apiTitle Laboratorio Plumber
 #* @apiDescription Nos servira para usar el feature forward to another handler
 
-
 # Dynamic Routes - User & User ID
 
 #  dataframe con la informacion de user y user id
@@ -39,7 +38,7 @@ function(from, to){
 
 # Typed Dinamic Routes
 
-#* @get /type/<id>
+#* @get /user/<id:int>
 function(id){
   list(
     id = id,
@@ -47,5 +46,21 @@ function(id){
   )
 }
 
+#* @post /user/activated/<active:bool>
+function(active){
+  if (!active){
+    print("El usuario no esta activado")
+  }
+  else{
+    print("El usuario esta activado")
+  }
+}
 
+#* @get /user/charged/<price:double>
+function(price){
+  list(
+    price = price,
+    mensaje = 'suscripcion pagada'
+  )
+}
 
