@@ -3,7 +3,7 @@ title: "Reporte Analítico"
 output: 
   flexdashboard::flex_dashboard:
     orientation: rows
-    vertical_layout: fill
+    vertical_layout: scroll
 ---
 
 ```{r setup, include=FALSE}
@@ -11,12 +11,215 @@ library(flexdashboard)
 library(readr)
 library(dplyr)
 library(leaflet)
+library(formattable)
 library(crosstalk)
+library(ggplot2)
+library(lubridate)
 library(DT)
+library(tm)
+library(tidyverse)
+library(usa)
 ```
 
-```{r}
+```{r include=FALSE}
 tiendata <- read_csv("tienda.csv")
 tiendata
 ```
+
+```{r include=FALSE}
+metricas <- tiendata %>%
+  summarise(tot_sales = sum(Sales),
+            tot_profits = sum(Profit))
+metricas
+```
+
+```{r include=FALSE}
+cliente <- tiendata %>%
+  select(`Customer Name`,Sales)%>%
+  group_by(`Customer Name`)%>%
+  summarise(sumVenta = sum(Sales)) %>%
+  arrange(desc(sumVenta))%>%
+  top_n(1)
+cliente
+```
+
+```{r include=FALSE}
+colnames(tiendata)[14] <- "ProductID"
+colnames(tiendata)[17] <- "ProductName"
+colnames(tiendata)[12] <- "PostalCode"
+masRentable <- tiendata %>%
+  select(ProductName,Profit) %>%
+  group_by(ProductName) %>%
+  summarise(sumGanancia = sum(Profit)) %>%
+  arrange(desc(sumGanancia))%>%
+  top_n(1)
+masRentable
+```
+
+```{r include=FALSE}
+menosRentable <- tiendata %>%
+  select(ProductName,Profit) %>%
+  group_by(ProductName) %>%
+  summarise(sumGanancia = sum(Profit)) %>%
+  arrange(sumGanancia)%>%
+  top_n(-1)
+menosRentable
+```
+
+```{r include=FALSE}
+tiendata$Year <- format(as.Date(tiendata$`Order Date`, format="%m/%d/%Y"),"%Y")
+tiendata$Month <- format(as.Date(tiendata$`Order Date`, format="%m/%d/%Y"),"%m")
+ventaanual <- tiendata %>%
+  select(Year, Sales, Month) %>%
+  group_by(Year,Month) %>%
+  summarise(ventaXano = sum(Sales))
+ventaanual
+```   
+
+```{r include=FALSE}
+ventaanualSegmento <- tiendata %>%
+  select(Year, Sales, Segment) %>%
+  group_by(Year,Segment) %>%
+  summarise(ventaXano = sum(Sales))
+ventaanualSegmento
+``` 
+
+```{r include=FALSE}
+ventasArea <- tiendata %>%
+  select(`Order Date`, Country, City, State, PostalCode, Category,Year, Sales)%>%
+  group_by(`Order Date`,Year, Country, City, State, PostalCode, Category)%>%
+  summarise(ventas = sum(Sales))
+ventasArea
+```
+
+```{r}
+zcs <- usa::zipcodes
+longitudes <- zcs %>%
+  select(zip,lat, long)
+longitudes
+```
+
+```{r}
+
+ventasArea <- merge(ventasArea, longitudes, by.x = "PostalCode", 
+             by.y = "zip", all.x = TRUE, all.y = FALSE)
+
+```
+
+
+# Metricas
+
+##
+
+### Ventas Totales
+
+```{r}
+fventas <- comma(metricas$tot_sales, digits = 2)
+valueBox(paste0("$",fventas), icon = 'fa-shopping-bag', color = "#29bf12")
+```
+
+### Ganancias Totales
+
+```{r}
+fganancias <- comma(metricas$tot_profits, digits = 2)
+valueBox(paste0("$",fganancias), icon = 'fa-money', color = "#76c893")
+```
+
+### Cliente Estrella
+
+```{r}
+festrella <- cliente$`Customer Name`
+fsumaestrella <- comma(cliente$sumVenta, digits = 2)
+valueBox(festrella, caption = (paste0("Cliente Estrella, Ventas de: $",fsumaestrella)), icon = 'fa-street-view', color = "#ff9914")
+```
+
+##
+
+### Producto Mas Rentable
+
+```{r}
+frentable <- masRentable$ProductName
+fgananciarentable <- comma(masRentable$sumGanancia, digits = 2)
+valueBox(frentable, caption = (paste0("Producto Mas Rentable, Ganancias de: $",fgananciarentable)), icon = 'fa-certificate', color = "#08bdbd")
+```
+
+##
+
+### Producto Menos Rentable
+```{r}
+fnorentable <- menosRentable$ProductName
+fganancianorentable <- comma(menosRentable$sumGanancia, digits = 2)
+valueBox(fnorentable, caption = (paste0("Producto Menos Rentable, Perdidas de: $",fganancianorentable)), icon = 'fa-frown-o', color = "#f21b3f")
+```
+
+## {.tabset .tabset-fade}
+   
+### Ventas por Año
+
+```{r}
+ventaanual %>%
+  ggplot(aes(x = Year, y = ventaXano, fill = Month)) +
+  geom_bar(position="dodge", stat="identity")+
+  xlab("Año") + ylab("Ventas Realizadas") +
+  ggtitle("Ventas Totales por Año Operativo")+
+  labs(subtitle = "Se puede ver un incremento de ventas los ultimos meses de cada año.")
+```   
+ 
+### Ventas por Segmento de Cliente
+    
+```{r}
+ventaanualSegmento %>%
+  ggplot(aes(x = Year, y = ventaXano, fill = Segment)) +
+  geom_bar(position="dodge", stat="identity")+
+  xlab("Año") + ylab("Ventas Realizadas") +
+  ggtitle("Ventas Totales por Segmento de Cliente")+
+  labs(subtitle = "Las ventas son realizadas mayormente por el consumidor final.")
+```
+
+### Tabla de Ventas por Año
+
+```{r}
+ventaanual %>%
+  datatable()
+```
+
+##
+
+```{r include=FALSE}
+data_share <- SharedData$new(ventasArea %>%
+                                filter(Year > 2013))
+```
+
+### Ventas Segun Area y Categoria
+
+```{r}
+filter_slider("venta", "Ventas", data_share, 
+              step = 50, width = 700, 
+              column = ~ventas, min = 50, max = 10000)
+
+filter_select("yr", "Año", data_share, group = ~Year, multiple = FALSE)
+filter_select("cat", "Categoria", data_share, group = ~Category, multiple = FALSE)
+```
+
+##
+
+### Tabla Ventas Segun Area y Categoria
+
+```{r}
+data_share %>% 
+  DT::datatable()
+```
+
+### Visualizacion Geografica Ventas
+
+```{r}
+data_share %>%
+  leaflet() %>%
+  addTiles() %>%
+  addMarkers(lng = ~long,
+             lat = ~lat,
+             popup = ~as.numeric(ventas), label = ~as.character(Category))
+```
+
+
 

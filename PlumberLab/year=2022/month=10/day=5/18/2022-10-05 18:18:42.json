@@ -1,0 +1,1 @@
+{"req":{"Pclass":"1","Sex":"female","Age":"23","SibSp":"1","Parch":"3","Fare":"235","Embarked":"Q"},"query":"?Pclass=1&Sex=female&Age=23&SibSp=1&Parch=3&Fare=235&Embarked=Q","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 12_6_0) AppleWebKit/537.36 (KHTML, like Gecko) QtWebEngine/5.12.10 Chrome/69.0.3497.128 Safari/537.36"}
