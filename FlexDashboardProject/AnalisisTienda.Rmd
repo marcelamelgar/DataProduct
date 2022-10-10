@@ -92,7 +92,7 @@ ventasArea <- tiendata %>%
 ventasArea
 ```
 
-```{r}
+```{r include=FALSE}
 zcs <- usa::zipcodes
 longitudes <- zcs %>%
   select(zip,lat, long)
@@ -187,6 +187,7 @@ ventaanual %>%
 
 ```{r include=FALSE}
 data_share <- SharedData$new(ventasArea %>%
+                               select(Year, State, Category,long,lat,ventas)%>%
                                 filter(Year > 2013))
 ```
 
@@ -203,14 +204,14 @@ filter_select("cat", "Categoria", data_share, group = ~Category, multiple = FALS
 
 ##
 
-### Tabla Ventas Segun Area y Categoria
+### 
 
 ```{r}
 data_share %>% 
   DT::datatable()
 ```
 
-### Visualizacion Geografica Ventas
+###
 
 ```{r}
 data_share %>%
