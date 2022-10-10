@@ -99,6 +99,26 @@ longitudes <- zcs %>%
 longitudes
 ```
 
+```{r include=FALSE}
+colnames(tiendata)[5] <- "ShipMode"
+envios <- tiendata %>%
+  select(ShipMode, Sales)%>%
+  group_by(ShipMode)%>%
+  summarise(ventaXmodo = sum(Sales))
+envios
+```
+
+```{r include=FALSE}
+enviosPost <- tiendata %>%
+  select(ShipMode,PostalCode, City)
+
+enviosPost <- merge(enviosPost, longitudes, by.x = "PostalCode", 
+             by.y = "zip", all.x = TRUE, all.y = FALSE)
+enviosPost
+```
+
+
+
 ```{r}
 
 ventasArea <- merge(ventasArea, longitudes, by.x = "PostalCode", 
@@ -204,13 +224,6 @@ filter_select("cat", "Categoria", data_share, group = ~Category, multiple = FALS
 
 ##
 
-### 
-
-```{r}
-data_share %>% 
-  DT::datatable()
-```
-
 ###
 
 ```{r}
@@ -222,5 +235,45 @@ data_share %>%
              popup = ~as.numeric(ventas), label = ~as.character(Category))
 ```
 
+### 
 
+```{r}
+data_share %>% 
+  DT::datatable()
+```
+
+##
+
+```{r}
+data_share2 <- SharedData$new(enviosPost)
+```
+
+### Modos de Envio por Ciudad
+
+```{r}
+filter_select("city", "Ciudad", data_share2, group = ~City, multiple = FALSE)
+```
+
+##
+
+### Modos de Envio en Relacion a Ventas
+
+```{r}
+envios%>%
+  ggplot(aes(x="", y=ventaXmodo, fill=ShipMode)) +
+  geom_bar(stat="identity", width=1, color="white") +
+  coord_polar("y", start=0) +
+  theme_void()
+```
+
+###
+
+```{r}
+data_share2 %>%
+  leaflet() %>%
+  addTiles() %>%
+  addMarkers(lng = ~long,
+             lat = ~lat,
+             label = ~as.character(ShipMode))
+```
 
