@@ -127,7 +127,7 @@ ventasArea <- merge(ventasArea, longitudes, by.x = "PostalCode",
 ```
 
 
-# Metricas
+# Metricas {data-icon=fa-bar-chart}
 
 ##
 
@@ -203,19 +203,21 @@ ventaanual %>%
   datatable()
 ```
 
+# Analisis por Ventas {data-icon=fa-shopping-basket, data-orientation=columns}
+
 ##
 
 ```{r include=FALSE}
 data_share <- SharedData$new(ventasArea %>%
                                select(Year, State, Category,long,lat,ventas)%>%
-                                filter(Year > 2013))
+                                filter(Year > 2015))
 ```
 
 ### Ventas Segun Area y Categoria
 
 ```{r}
 filter_slider("venta", "Ventas", data_share, 
-              step = 50, width = 700, 
+              step = 50, width = 400, 
               column = ~ventas, min = 50, max = 10000)
 
 filter_select("yr", "Año", data_share, group = ~Year, multiple = FALSE)
@@ -235,26 +237,21 @@ data_share %>%
              popup = ~as.numeric(ventas), label = ~as.character(Category))
 ```
 
-### 
+### {style="width:700px;"}
 
 ```{r}
 data_share %>% 
   DT::datatable()
 ```
 
+# Analisis por Envios {data-icon=fa-truck}
+
 ##
 
 ```{r}
-data_share2 <- SharedData$new(enviosPost)
+data_share2 <- SharedData$new(enviosPost%>%
+                                top_n(1500))
 ```
-
-### Modos de Envio por Ciudad
-
-```{r}
-filter_select("city", "Ciudad", data_share2, group = ~City, multiple = FALSE)
-```
-
-##
 
 ### Modos de Envio en Relacion a Ventas
 
@@ -269,11 +266,22 @@ envios%>%
 ###
 
 ```{r}
+filter_select("city", "Ciudad", data_share2, group = ~City, multiple = FALSE)
+
 data_share2 %>%
   leaflet() %>%
   addTiles() %>%
   addMarkers(lng = ~long,
              lat = ~lat,
              label = ~as.character(ShipMode))
+```
+
+## {.tabset .tabset-fade}
+
+### Data Segun Modo de Envio
+
+```{r}
+data_share2 %>% 
+  DT::datatable()
 ```
 
