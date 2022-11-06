@@ -28,6 +28,39 @@ shinyServer(function(input, output, session) {
   
   #### ATLETAS ####
   
+  sex <<- NULL
+  age <<- NULL
+  
+  atletas <- reactive({
+    if(!is.null(input$season)&!is.null(input$year)&!is.null(input$sport)){
+      sex <<- athlete_events%>%
+        select(Season,Year,Sport,Sex)%>%
+        filter(Season == input$season & Year == input$year & Sport == input$sport)
+      
+      age <<- athlete_events%>%
+        select(Season,Year,Sport,Age)%>%
+        filter(Season == input$season & Year == input$year & Sport == input$sport)
+    }
+  })
+  
+  output$plotSexo <- renderPlot({
+    atletas()
+    if (nrow(sex)!=0){
+      barplot(table(sex$Sex), main = "Cantidad de atletas",
+              names.arg = c("Mujeres","Hombres"), col = c("pink","lightblue"),
+              horiz = TRUE)
+    }
+  })
+  
+  output$plotEdades <- renderPlot({
+    atletas()
+    if (nrow(age)!=0){
+      hist(age$Age, main = "Distribución de edades", 
+           xlab = "Edad", col = "lightblue", 
+           breaks = seq(min(age$Age), max(age$Age), length.out = 6))
+    }
+  })
+  
   Atletas <- athlete_events %>%
     distinct(Name, Games)
   Atletas

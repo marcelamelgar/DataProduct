@@ -8,7 +8,7 @@ library(shinyWidgets)
 shinyUI(fluidPage(theme = shinytheme("sandstone"),
 
     navbarPage("Juegos Olimpicos",
-               tabPanel("Eventos",
+               tabPanel("Eventos", icon = icon("fa-light fa-calendar-star"),
                         sidebarLayout(
                           sidebarPanel(
                             h2('Eventos Olimpicos'),
@@ -35,17 +35,27 @@ shinyUI(fluidPage(theme = shinytheme("sandstone"),
                           )
                         )
                ),
-               tabPanel("Equipos",
+               tabPanel("Equipos", icon = icon("fa-thin fa-users-viewfinder"),
                ),
-               tabPanel("Atletas",
+               tabPanel("Atletas", icon = icon("fa-thin fa-ranking-star"),
                         sidebarLayout(
                           sidebarPanel(
                             h2('Atletas Olimpicos'),
                             br(),
-                            sliderInput('ChooseParticipation', 'Seleccione Rango de Participaciones:',
-                                        value = c(2,5),
-                                        min = min(countAtletas$participacion), max = max(countAtletas$participacion),
-                                        step = 1)
+                            #sliderInput('ChooseParticipation', 'Seleccione Rango de Participaciones:',
+                            #            value = c(2,5),
+                            #            min = min(countAtletas$participacion), max = max(countAtletas$participacion),
+                            #            step = 1),
+                            br(),
+                            checkboxGroupInput('season','Season',choices = unique(athlete_events$Season), 
+                                               selected = unique(athlete_events$Season), inline = TRUE),
+                            br(),
+                            numericInput('year','Year',value = 2000, step = 2, min = min(athlete_events$Year), 
+                                         max = max(athlete_events$Year)),
+                            br(),
+                            selectInput('sport', 'Sport', choices = unique(athlete_events$Sport),selected = athlete_events$Sport[1]),
+                            br(),
+                            actionButton("apply","Apply")
                           ),
                           mainPanel(
                             tabsetPanel(
@@ -71,7 +81,7 @@ shinyUI(fluidPage(theme = shinytheme("sandstone"),
                           )
                         )
                           ),
-                tabPanel("Logros",
+                tabPanel("Logros", icon = icon("fa-duotone fa-medal"),
                 )
                )
     )
