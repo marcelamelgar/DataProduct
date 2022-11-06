@@ -38,6 +38,38 @@ shinyUI(fluidPage(theme = shinytheme("sandstone"),
                tabPanel("Equipos",
                ),
                tabPanel("Atletas",
+                        sidebarLayout(
+                          sidebarPanel(
+                            h2('Atletas Olimpicos'),
+                            br(),
+                            sliderInput('ChooseParticipation', 'Seleccione Rango de Participaciones:',
+                                        value = c(2,5),
+                                        min = min(countAtletas$participacion), max = max(countAtletas$participacion),
+                                        step = 1)
+                          ),
+                          mainPanel(
+                            tabsetPanel(
+                              tabPanel(
+                                "Informacion General",
+                                h2("Informacion Atletas"),
+                                fluidRow(
+                                  column(12, dataTableOutput('tablaAtletas'))
+                                )
+                              ),
+                              tabPanel(
+                                "Edad y Sexo",
+                                fluidRow(
+                                  column(6, 
+                                         h4("Grafica Sexo"),
+                                         plotOutput('plotSexo')),
+                                  column(6,
+                                         h4("Grafica Edades"),
+                                         plotOutput('plotEdades'))
+                                )
+                              )
+                            )
+                          )
+                        )
                           ),
                 tabPanel("Logros",
                 )

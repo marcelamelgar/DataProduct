@@ -3,9 +3,11 @@ library(crosstalk)
 library(DT)
 library(dplyr)
 library(tidyverse)
+library(ggplot2)
 
 shinyServer(function(input, output, session) {
   
+  #### EVENTOS ####
   Events <- athlete_events %>%
     distinct(City, Year, Season) %>%
     arrange(Year)
@@ -23,5 +25,17 @@ shinyServer(function(input, output, session) {
     updateSliderInput(session, 'ChooseYear', value = c(min(athlete_events$Year), max(athlete_events$Year)))
     updateCheckboxGroupInput(session, 'chkboxSeason', choices = unique(athlete_events$Season), selected=NULL, inline = TRUE)
   })
+  
+  #### ATLETAS ####
+  
+  Atletas <- athlete_events %>%
+    distinct(Name, Games)
+  Atletas
+  
+  countAtletas <- Atletas %>%
+    select(Name, Games) %>%
+    group_by(Name)%>%
+    summarise(participacion = n_distinct(Games))
+  countAtletas
 
 })
