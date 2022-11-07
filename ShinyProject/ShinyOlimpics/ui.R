@@ -54,6 +54,7 @@ shinyUI(fluidPage(theme = shinytheme("sandstone"),
                                      dataTableOutput("tablaEquipos")
                                      )
                             ),
+                          br(),br(),
                           fluidRow(
                             column(12,
                                    plotOutput('plotEquipos'))
@@ -65,21 +66,24 @@ shinyUI(fluidPage(theme = shinytheme("sandstone"),
                         sidebarLayout(
                           sidebarPanel(
                             h2('Atletas Olimpicos'),
+                            h4('Complete los 3 filtros para ver su informacion'),
                             br(),
-                            #sliderInput('ChooseParticipation', 'Seleccione Rango de Participaciones:',
-                            #            value = c(2,5),
-                            #            min = min(countAtletas$participacion), max = max(countAtletas$participacion),
-                            #            step = 1),
+                            sliderInput('ChooseParticipation', 'Seleccione Rango de Participaciones:',
+                                        value = c(2,5),
+                                        min = min(countAtletas$participacion), max = max(countAtletas$participacion),
+                                        step = 1),
                             br(),
-                            checkboxGroupInput('season','Season',choices = unique(athlete_events$Season), 
-                                               selected = unique(athlete_events$Season), inline = TRUE),
+                            pickerInput('filterSport', 'Seleccione Deporte', 
+                                        choices = unique(athlete_events$Sport),
+                                        options = list(`actions-box` = TRUE),
+                                        multiple = T),
                             br(),
-                            numericInput('year','Year',value = 2000, step = 2, min = min(athlete_events$Year), 
-                                         max = max(athlete_events$Year)),
+                            pickerInput('filterTeam', 'Seleccione Equipo', 
+                                        choices = unique(athlete_events$Team),
+                                        options = list(`actions-box` = TRUE),
+                                        multiple = T),
                             br(),
-                            selectInput('sport', 'Sport', choices = unique(athlete_events$Sport),selected = athlete_events$Sport[1]),
-                            br(),
-                            actionButton("apply","Apply")
+                            actionButton("clean2","Limpiar")
                           ),
                           mainPanel(
                             tabsetPanel(
@@ -88,10 +92,37 @@ shinyUI(fluidPage(theme = shinytheme("sandstone"),
                                 h2("Informacion Atletas"),
                                 fluidRow(
                                   column(12, dataTableOutput('tablaAtletas'))
+                                ),
+                                fluidRow(
+                                  h3("Seleccion de Atletas"),
+                                  column(12, dataTableOutput('selectedAtletas'))
                                 )
                               ),
                               tabPanel(
                                 "Edad y Sexo",
+                                #checkboxGroupInput('season','Season',choices = unique(athlete_events$Season), 
+                                #                   selected = unique(athlete_events$Season), inline = TRUE),
+                                #br(),
+                                #numericInput('year','Year',value = 2000, step = 2, min = min(athlete_events$Year), 
+                                #             max = max(athlete_events$Year)),
+                                #br(),
+                                #selectInput('sport', 'Sport', choices = unique(athlete_events$Sport),selected = athlete_events$Sport[1]),
+                                #br(),
+                                #actionButton("apply","Apply")
+                                br(),
+                                fluidRow(
+                                  column(3,
+                                         checkboxGroupInput('season','Season',choices = unique(athlete_events$Season), 
+                                                            selected = unique(athlete_events$Season), inline = TRUE)
+                                         ),
+                                  column(3,
+                                         numericInput('year','Year',value = 2000, step = 2, min = min(athlete_events$Year), 
+                                                      max = max(athlete_events$Year))
+                                         ),
+                                  column(3,
+                                         selectInput('sport', 'Sport', choices = unique(athlete_events$Sport),selected = athlete_events$Sport[1])
+                                         )
+                                ),
                                 fluidRow(
                                   column(6, 
                                          h4("Grafica Sexo"),

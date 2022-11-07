@@ -39,11 +39,17 @@ shinyServer(function(input, output, session) {
     group_by(NOC) %>%
     summarise(deportes = n_distinct(Sport))
   
+  filteredEquipos <- Equipos %>%
+    select(NOC, Sport) %>%
+    group_by(NOC,Sport) %>%
+    summarise(participaciones = n())
+  filteredEquipos
+    
   observe({
     query <- parseQueryString(session$clientData$url_search)
     team <- query[["team"]]
     if(!is.null(team)){
-      updateSelectInput(session, 'team', selected = team)
+      updateSelectInput(session, "team", selected = team)
     }
   })
   
@@ -67,25 +73,21 @@ shinyServer(function(input, output, session) {
   })
   
   output$tablaEquipos <- renderDataTable({
-    
-    x <- Equipos
-    team <- input$chooseTeam
-    
     dt <- Equipos %>%
       filter(NOC %in% input$chooseTeam)
     dt
   })
   
   output$plotEquipos <- renderPlot({
-    df <- countSports %>%
+    df <- filteredEquipos %>%
       filter(NOC %in% input$chooseTeam)
 
-      ggplot(df,  mapping = aes(x=df$NOC, y=df$deportes)) + 
-      geom_bar(position="stack", stat="identity")+
-      xlab("Equipo")+
-      ylab("Deportes")+
+    ggplot(df, aes(x="", y=participaciones, fill=Sport)) +
+      geom_bar(stat="identity", width=1, color="white") +
+      coord_polar("y", start=0) +
       ggtitle("Cantidad de Deportes en los que ha participado el equipo")
   })
+
   
   #### ATLETAS ####
   
@@ -123,7 +125,7 @@ shinyServer(function(input, output, session) {
   })
   
   Atletas <- athlete_events %>%
-    distinct(Name, Games)
+    distinct(ID, Name, Sex,Sport, Team,Age,Games)
   Atletas
   
   countAtletas <- Atletas %>%
@@ -131,6 +133,35 @@ shinyServer(function(input, output, session) {
     group_by(Name)%>%
     summarise(participacion = n_distinct(Games))
   countAtletas
+
+  mergedAtletas <-merge(Atletas, countAtletas, by="Name")
+  
+  output$tablaAtletas <- renderDataTable({
+    mergedAtletas %>%
+      filter(participacion >= input$ChooseParticipation[1] & participacion <= input$ChooseParticipation[2])%>%
+      filter(Sport %in% input$filterSport)%>%
+      filter(Team %in% input$filterTeam)%>%
+      DT::datatable(options = list(scrollX = TRUE))
+  })
+  
+  output$selectedAtletas <- renderDataTable({
+    mergedAtletas[input$tablaAtletas_rows_selected,] %>%
+      datatable(extensions = "Buttons", 
+                options = list(paging = TRUE,
+                               scrollX=TRUE, 
+                               searching = TRUE,
+                               ordering = TRUE,
+                               dom = 'Bfrtip',
+                               buttons = c('csv'),
+                               pageLength=5, 
+                               lengthMenu=c(3,5,10) ))
+  })
+  
+  observeEvent(input$clean2,{
+    updatePickerInput(session, 'filterSport', choices = unique(sort(athlete_events$Sport)),options = list(`actions-box` = TRUE))
+    updatePickerInput(session, 'filterTeam', choices = unique(sort(athlete_events$Team)),options = list(`actions-box` = TRUE))
+    updateSliderInput(session, 'ChooseYear', value = c(min(countAtletas$participacion)), max(countAtletas$participacion))
+  })
   
   #### LOGROS ####
 
