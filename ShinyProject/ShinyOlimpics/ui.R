@@ -4,6 +4,7 @@ library(shinythemes)
 library(markdown)
 library(lubridate)
 library(shinyWidgets)
+library(highcharter)
 
 shinyUI(fluidPage(theme = shinytheme("sandstone"),
 
@@ -36,6 +37,29 @@ shinyUI(fluidPage(theme = shinytheme("sandstone"),
                         )
                ),
                tabPanel("Equipos", icon = icon("fa-thin fa-users-viewfinder"),
+                        sidebarLayout(
+                          sidebarPanel(
+                            h2('Equipos Participantes'),
+                            br(),
+                            selectInput('chooseTeam', 'Escoge el NOC del equipo:',
+                                        choices = unique(sort(Equipos$NOC)),
+                                        selected = NULL),
+                            br(),
+                            textInput("url_param","Marcador: ",value = "")
+                          ),
+                        mainPanel(
+                          h2("Equipos Olimpicos"),
+                          fluidRow(
+                              column(12,
+                                     dataTableOutput("tablaEquipos")
+                                     )
+                            ),
+                          fluidRow(
+                            column(12,
+                                   plotOutput('plotEquipos'))
+                          )
+                          
+                        ))
                ),
                tabPanel("Atletas", icon = icon("fa-thin fa-ranking-star"),
                         sidebarLayout(
