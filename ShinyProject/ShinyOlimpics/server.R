@@ -49,7 +49,7 @@ shinyServer(function(input, output, session) {
     query <- parseQueryString(session$clientData$url_search)
     team <- query[["team"]]
     if(!is.null(team)){
-      updateSelectInput(session, "team", selected = team)
+      updateSelectInput(session, "chooseTeam", selected = team)
     }
   })
   

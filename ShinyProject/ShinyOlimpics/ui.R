@@ -9,7 +9,7 @@ library(highcharter)
 shinyUI(fluidPage(theme = shinytheme("sandstone"),
 
     navbarPage("Juegos Olimpicos",
-               tabPanel("Eventos", icon = icon("fa-light fa-calendar-star"),
+               tabPanel("Eventos", icon = icon("fa fa-calendar-o"),
                         sidebarLayout(
                           sidebarPanel(
                             h2('Eventos Olimpicos'),
