@@ -164,5 +164,8 @@ shinyServer(function(input, output, session) {
   })
   
   #### LOGROS ####
+  
+  Logros <- athlete_events %>%
+    select(Team, NOC, Year, Sport, Event, Medal, Name)
 
 })

@@ -137,6 +137,27 @@ shinyUI(fluidPage(theme = shinytheme("sandstone"),
                         )
                           ),
                 tabPanel("Logros", icon = icon("fa-duotone fa-medal"),
+                         sidebarLayout(
+                           sidebarPanel(
+                             h2('Atletas Ganadores'),
+                             h4('Complete los 3 filtros para ver su informacion'),
+                             br()
+                           ),
+                           mainPanel(
+                             tabsetPanel(
+                               tabPanel(
+                                 "Atletas Oro, Plata y Bronce",
+                                 h2("Atletas Ganadores"),
+                                 fluidRow(
+                                   column(12, dataTableOutput('tablaLogros'))
+                                 )
+                               ),
+                               tabPanel(
+                                 "Carga y Busqueda de Logros"
+                               )
+                             )
+                           )
+                         )
                 )
                )
     )
