@@ -153,7 +153,18 @@ shinyUI(fluidPage(theme = shinytheme("sandstone"),
                                  )
                                ),
                                tabPanel(
-                                 "Carga y Busqueda de Logros"
+                                 "Carga y Busqueda de Logros",
+                                 h3("Carga de Archivo con Atletas para verificar sus logros"),
+                                 fluidRow(
+                                   column(12,
+                                          fileInput("file_input", 'Cargar Archivo', buttonLabel = 'Buscar',
+                                                    placeholder = 'No hay archivo seleccionado')
+                                          ),
+                                 ),
+                                 fluidRow(
+                                   column(12,
+                                          dataTableOutput('tablaCargada'))
+                                 )
                                )
                              )
                            )
