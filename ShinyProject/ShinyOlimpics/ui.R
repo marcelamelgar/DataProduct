@@ -100,15 +100,6 @@ shinyUI(fluidPage(theme = shinytheme("sandstone"),
                               ),
                               tabPanel(
                                 "Edad y Sexo",
-                                #checkboxGroupInput('season','Season',choices = unique(athlete_events$Season), 
-                                #                   selected = unique(athlete_events$Season), inline = TRUE),
-                                #br(),
-                                #numericInput('year','Year',value = 2000, step = 2, min = min(athlete_events$Year), 
-                                #             max = max(athlete_events$Year)),
-                                #br(),
-                                #selectInput('sport', 'Sport', choices = unique(athlete_events$Sport),selected = athlete_events$Sport[1]),
-                                #br(),
-                                #actionButton("apply","Apply")
                                 br(),
                                 fluidRow(
                                   column(3,
@@ -139,17 +130,26 @@ shinyUI(fluidPage(theme = shinytheme("sandstone"),
                 tabPanel("Logros", icon = icon("fa-duotone fa-medal"),
                          sidebarLayout(
                            sidebarPanel(
-                             h2('Atletas Ganadores'),
-                             h4('Complete los 3 filtros para ver su informacion'),
+                             h2('Resultados'),
+                             sliderInput('edad2', 'Seleccione rango de edades:',
+                                         value = c(min(athlete_events$Age[!is.na(athlete_events$Age)]),
+                                                   max(athlete_events$Age[!is.na(athlete_events$Age)])),
+                                         min = min(athlete_events$Age[!is.na(athlete_events$Age)]), 
+                                         max = max(athlete_events$Age[!is.na(athlete_events$Age)]),
+                                         step = 5),
+                             selectInput('team2', 'Seleccione un equipo', 
+                                         choices = unique(athlete_events$Team)),
+                             selectInput('year2', 'Seleccione el año', 
+                                         choices = unique(athlete_events$Year)),
                              br()
                            ),
                            mainPanel(
                              tabsetPanel(
                                tabPanel(
-                                 "Atletas Oro, Plata y Bronce",
-                                 h2("Atletas Ganadores"),
+                                 "Medallas",
+                                 h3("Resultados del equipo"),
                                  fluidRow(
-                                   column(12, dataTableOutput('tablaLogros'))
+                                   column(12, plotOutput('plotlogros'),textOutput("extra"))
                                  )
                                ),
                                tabPanel(

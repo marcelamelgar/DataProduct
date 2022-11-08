@@ -174,6 +174,34 @@ shinyServer(function(input, output, session) {
   
   #### LOGROS ####
   
+  medallas <- reactive({
+    logros <<- NULL
+    if(!is.null(input$year2)&!is.null(input$team2)&!is.null(input$year2)){
+      logros <<- athlete_events%>%
+        select(Age,Team,Year,Medal,Sex)%>%
+        filter(Age == input$edad2 & Year == input$year2 & Team == input$team2 & !is.na(Medal))%>%
+        select(Sex, Medal)%>%
+        table()
+    }
+  })
+  
+  output$plotlogros <- renderPlot({
+    medallas()
+    if(nrow(logros)!=0){
+      barplot(logros,
+              col = c("gray"),
+              main = "Medallas obtenidas",
+              xlab = "Medalla",
+              ylab = "Cantidad",
+              legend.text = rownames(logros),
+              args.legend = list(x = "topright",
+                                 inset = c(-0.1, -0.45)))
+    } else {
+      #output$extra <- renderText("NO HAY REGISTROS")
+    }
+  })
+  
+  
   Logros <- athlete_events %>%
     select(Team, NOC, Year, Sport, Event, Medal, Name, ID,Games)
   
