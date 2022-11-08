@@ -166,7 +166,7 @@ shinyServer(function(input, output, session) {
   #### LOGROS ####
   
   Logros <- athlete_events %>%
-    select(Team, NOC, Year, Sport, Event, Medal, Name)
+    select(Team, NOC, Year, Sport, Event, Medal, Name, ID,Games)
   
   
   archivo_cargado <- reactive({
@@ -183,5 +183,20 @@ shinyServer(function(input, output, session) {
   output$tablaCargada <- renderDataTable({
     datatable(archivo_cargado())
   })
+  
+  mergedLogros <- reactive({
+    deefe <- merge(Logros, archivo_cargado(), by = c("ID","Name", "Team", "Sport", "Games"))
+    return(deefe)
+  })
+  
+  output$tablasoloLogros <- renderDataTable({
+    df <- mergedLogros() %>%
+      select(Name,Team, Sport, Games,Medal)
+    datatable(df)%>%
+      formatStyle(columns = "Medal", 
+                  background = styleEqual(c('Gold', 'Silver','Bronze'), c("gold", "darkgrey","lightsalmon")))
+  })
+  
+  
 
 })
