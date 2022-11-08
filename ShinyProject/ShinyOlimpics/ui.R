@@ -164,6 +164,11 @@ shinyUI(fluidPage(theme = shinytheme("sandstone"),
                                  fluidRow(
                                    column(12,
                                           dataTableOutput('tablaCargada'))
+                                 ),
+                                 h2("Logros alcanzados por Atletas seleccionados"),
+                                 fluidRow(
+                                   column(12,
+                                          dataTableOutput('tablasoloLogros'))
                                  )
                                )
                              )
