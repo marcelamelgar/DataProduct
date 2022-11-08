@@ -21,6 +21,8 @@ shinyServer(function(input, output, session) {
     dt
   })
   
+  
+  
   observeEvent(input$clean,{
     updatePickerInput(session, 'selectHost', choices = unique(sort(athlete_events$City)),options = list(`actions-box` = TRUE))
     updateSliderInput(session, 'ChooseYear', value = c(min(athlete_events$Year), max(athlete_events$Year)))
@@ -91,10 +93,17 @@ shinyServer(function(input, output, session) {
   
   #### ATLETAS ####
   
-  sex <<- NULL
-  age <<- NULL
+  observeEvent(input$season,{
+    updateSelectInput(session, "sport",choices = unique(athlete_events[athlete_events$Season==input$season,"Sport"]),
+                      selected = NULL)
+  })
+  
+  
   
   atletas <- reactive({
+    sex <<- NULL
+    age <<- NULL
+    
     if(!is.null(input$season)&!is.null(input$year)&!is.null(input$sport)){
       sex <<- athlete_events%>%
         select(Season,Year,Sport,Sex)%>%
