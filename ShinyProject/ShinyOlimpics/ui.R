@@ -1,9 +1,36 @@
-
 library(shiny)
 library(shinythemes)
 library(markdown)
-#library(shinyWidgets)
+library(shinyWidgets)
 library(rsconnect)
+library(dplyr)
+
+#Dataset
+athlete_events <<- read.csv("https://raw.githubusercontent.com/marcelamelgar/DataProduct/main/ShinyProject/ShinyOlimpics/athlete_events.csv")
+
+Atletas <<- athlete_events %>%
+  distinct(ID, Name, Sex,Sport, Team,Age,Games)
+
+countAtletas <<- Atletas %>%
+  select(Name, Games) %>%
+  group_by(Name)%>%
+  summarise(participacion = n_distinct(Games))
+
+mergedAtletas <<-merge(Atletas, countAtletas, by="Name")
+
+Equipos <- athlete_events %>%
+  distinct(Team, NOC, Sport, Event, Games) %>%
+  arrange(Games)
+
+countSports <- Equipos %>%
+  select(Team, NOC, Sport) %>%
+  group_by(NOC) %>%
+  summarise(deportes = n_distinct(Sport))
+
+filteredEquipos <- Equipos %>%
+  select(NOC, Sport) %>%
+  group_by(NOC,Sport) %>%
+  summarise(participaciones = n())
 
 shinyUI(fluidPage(theme = shinytheme("sandstone"),
 

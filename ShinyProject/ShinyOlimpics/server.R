@@ -1,6 +1,7 @@
 library(shiny)
 library(DT)
 library(dplyr)
+library(rsconnect)
 library(tidyverse)
 library(ggplot2)
 library(readr)
@@ -8,7 +9,7 @@ library(readr)
 
 shinyServer(function(input, output, session) {
   
-  athlete_events <- read.csv("https://raw.githubusercontent.com/marcelamelgar/DataProduct/main/ShinyProject/ShinyOlimpics/athlete_events.csv")
+  athlete_events <<- read.csv("https://raw.githubusercontent.com/marcelamelgar/DataProduct/main/ShinyProject/ShinyOlimpics/athlete_events.csv")
   
   #### EVENTOS ####
   Events <- athlete_events %>%
@@ -239,3 +240,5 @@ shinyServer(function(input, output, session) {
   
 
 })
+
+
