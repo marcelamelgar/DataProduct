@@ -2,14 +2,13 @@
 library(shiny)
 library(shinythemes)
 library(markdown)
-library(lubridate)
-library(shinyWidgets)
-library(highcharter)
+#library(shinyWidgets)
+library(rsconnect)
 
 shinyUI(fluidPage(theme = shinytheme("sandstone"),
 
     navbarPage("Juegos Olimpicos",
-               tabPanel("Eventos", icon = icon("fa fa-calendar-o"),
+               tabPanel("Eventos",
                         sidebarLayout(
                           sidebarPanel(
                             h2('Eventos Olimpicos'),
@@ -137,8 +136,10 @@ shinyUI(fluidPage(theme = shinytheme("sandstone"),
                                          min = min(athlete_events$Age[!is.na(athlete_events$Age)]), 
                                          max = max(athlete_events$Age[!is.na(athlete_events$Age)]),
                                          step = 5),
+                             br(),
                              selectInput('team2', 'Seleccione un equipo', 
                                          choices = unique(athlete_events$Team)),
+                             br(),
                              selectInput('year2', 'Seleccione el año', 
                                          choices = unique(athlete_events$Year)),
                              br()

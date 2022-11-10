@@ -1,12 +1,14 @@
 library(shiny)
-library(crosstalk)
 library(DT)
 library(dplyr)
 library(tidyverse)
 library(ggplot2)
-library(highcharter)
+library(readr)
+
 
 shinyServer(function(input, output, session) {
+  
+  athlete_events <- read.csv("athlete_events.csv")
   
   #### EVENTOS ####
   Events <- athlete_events %>%
@@ -94,7 +96,7 @@ shinyServer(function(input, output, session) {
   #### ATLETAS ####
   
   observeEvent(input$season,{
-    updateSelectInput(session, "sport",choices = unique(athlete_events[athlete_events$Season==input$season,"Sport"]),
+    updateSelectInput(session, "sport",choices = unique(athlete_events[athlete_events$Season%in%input$season,"Sport"]),
                       selected = NULL)
   })
   
