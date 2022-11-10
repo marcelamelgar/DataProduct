@@ -8,7 +8,7 @@ library(readr)
 
 shinyServer(function(input, output, session) {
   
-  athlete_events <- read.csv("athlete_events.csv")
+  athlete_events <- read.csv("https://raw.githubusercontent.com/marcelamelgar/DataProduct/main/ShinyProject/ShinyOlimpics/athlete_events.csv")
   
   #### EVENTOS ####
   Events <- athlete_events %>%
