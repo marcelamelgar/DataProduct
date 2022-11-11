@@ -12,44 +12,34 @@ shinyServer(function(input, output, session) {
   athlete_events <<- read.csv("https://raw.githubusercontent.com/marcelamelgar/DataProduct/main/ShinyProject/ShinyOlimpics/athlete_events.csv")
   
   #### EVENTOS ####
-  Events <- athlete_events %>%
-    distinct(City, Year, Season) %>%
-    arrange(Year)
-  
   output$tablaEventos <- renderDataTable({
-    dt <- Events %>%
-      filter(Year >= input$ChooseYear[1] & Year <= input$ChooseYear[2]) %>%
-      filter(City %in% input$selectHost) %>%
-      filter(Season %in% input$chkboxSeason)
-    dt
+    Events <- NULL
+    if(!is.null(input$ChooseYear)&!is.null(input$chkboxSeason)){
+      a <- athlete_events%>%
+        select(Year,Season,City)
+      
+      a[0,] %>%
+        DT::datatable(rownames = FALSE, filter = "none")
+      
+      Events <- athlete_events%>%
+        distinct(City, Year, Season)%>%
+        arrange(Year)%>%
+        filter(Year >= input$ChooseYear[1] & Year <= input$ChooseYear[2]) %>%
+        filter(Season==input$chkboxSeason)
+      
+      if(nrow(Events)!=0){
+        Events%>%
+          DT::datatable(rownames = FALSE, filter = "none")
+      }}
   })
   
   
-  
   observeEvent(input$clean,{
-    updatePickerInput(session, 'selectHost', choices = unique(sort(athlete_events$City)),options = list(`actions-box` = TRUE))
     updateSliderInput(session, 'ChooseYear', value = c(min(athlete_events$Year), max(athlete_events$Year)))
     updateCheckboxGroupInput(session, 'chkboxSeason', choices = unique(athlete_events$Season), selected=NULL, inline = TRUE)
   })
   
   #### EQUIPOS ####
-  
-  Equipos <- athlete_events %>%
-    distinct(Team, NOC, Sport, Event, Games) %>%
-    arrange(Games)
-  Equipos
-
-  countSports <- Equipos %>%
-    select(Team, NOC, Sport) %>%
-    group_by(NOC) %>%
-    summarise(deportes = n_distinct(Sport))
-  
-  filteredEquipos <- Equipos %>%
-    select(NOC, Sport) %>%
-    group_by(NOC,Sport) %>%
-    summarise(participaciones = n())
-  filteredEquipos
-    
   observe({
     query <- parseQueryString(session$clientData$url_search)
     team <- query[["team"]]
@@ -78,6 +68,9 @@ shinyServer(function(input, output, session) {
   })
   
   output$tablaEquipos <- renderDataTable({
+    
+    
+    
     dt <- Equipos %>%
       filter(NOC %in% input$chooseTeam)
     dt
@@ -101,8 +94,6 @@ shinyServer(function(input, output, session) {
                       selected = NULL)
   })
   
-  
-  
   atletas <- reactive({
     sex <<- NULL
     age <<- NULL
@@ -117,6 +108,7 @@ shinyServer(function(input, output, session) {
         filter(Season == input$season & Year == input$year & Sport == input$sport)
     }
   })
+  
   
   output$plotSexo <- renderPlot({
     atletas()
@@ -182,7 +174,7 @@ shinyServer(function(input, output, session) {
     if(!is.null(input$year2)&!is.null(input$team2)&!is.null(input$year2)){
       logros <<- athlete_events%>%
         select(Age,Team,Year,Medal,Sex)%>%
-        filter(Age == input$edad2 & Year == input$year2 & Team == input$team2 & !is.na(Medal))%>%
+        filter(Age >= input$edad2[1]&Age <= input$edad2[2] & Year == input$year2 & Team == input$team2 & !is.na(Medal))%>%
         select(Sex, Medal)%>%
         table()
     }
@@ -200,7 +192,7 @@ shinyServer(function(input, output, session) {
               args.legend = list(x = "topright",
                                  inset = c(-0.1, -0.45)))
     } else {
-      #output$extra <- renderText("NO HAY REGISTROS")
+      output$extra <- renderText(input$clean2)
     }
   })
   

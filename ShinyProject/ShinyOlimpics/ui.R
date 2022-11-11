@@ -18,19 +18,21 @@ countAtletas <<- Atletas %>%
 
 mergedAtletas <<-merge(Atletas, countAtletas, by="Name")
 
-Equipos <- athlete_events %>%
+Equipos <<- athlete_events %>%
   distinct(Team, NOC, Sport, Event, Games) %>%
   arrange(Games)
 
-countSports <- Equipos %>%
+countSports <<- Equipos %>%
   select(Team, NOC, Sport) %>%
   group_by(NOC) %>%
   summarise(deportes = n_distinct(Sport))
 
-filteredEquipos <- Equipos %>%
+filteredEquipos <<- Equipos %>%
   select(NOC, Sport) %>%
   group_by(NOC,Sport) %>%
   summarise(participaciones = n())
+
+#UI app
 
 shinyUI(fluidPage(theme = shinytheme("sandstone"),
 
@@ -39,17 +41,12 @@ shinyUI(fluidPage(theme = shinytheme("sandstone"),
                         sidebarLayout(
                           sidebarPanel(
                             h2('Eventos Olimpicos'),
-                            h4('Complete los 3 filtros para ver su informacion'),
+                            h5('Complete los filtros para conocer la ciudad anfitriona'),
                             br(),
                             sliderInput('ChooseYear', 'Seleccione Rango de Años:',
                                         value = c(min(athlete_events$Year), max(athlete_events$Year)),sep = "", 
                                         min = min(athlete_events$Year), max = max(athlete_events$Year),
                                         step = 2),
-                            br(),
-                            pickerInput('selectHost', 'Seleccione Ciudad Host:',
-                                        choices = unique(sort(athlete_events$City)),
-                                        options = list(`actions-box` = TRUE),
-                                        multiple = T),
                             br(),
                             checkboxGroupInput('chkboxSeason', 'Seleccione Temporada:',
                                                choices = unique(athlete_events$Season),
@@ -168,7 +165,7 @@ shinyUI(fluidPage(theme = shinytheme("sandstone"),
                                          choices = unique(athlete_events$Team)),
                              br(),
                              selectInput('year2', 'Seleccione el año', 
-                                         choices = unique(athlete_events$Year)),
+                                         choices = unique(sort(athlete_events$Year))),
                              br()
                            ),
                            mainPanel(
