@@ -14,13 +14,10 @@ shinyServer(function(input, output, session) {
   #### EVENTOS ####
   output$tablaEventos <- renderDataTable({
     Events <- NULL
+    a <- athlete_events%>%
+      select(Year,Season,City)
+    
     if(!is.null(input$ChooseYear)&!is.null(input$chkboxSeason)){
-      a <- athlete_events%>%
-        select(Year,Season,City)
-      
-      a[0,] %>%
-        DT::datatable(rownames = FALSE, filter = "none")
-      
       Events <- athlete_events%>%
         distinct(City, Year, Season)%>%
         arrange(Year)%>%
@@ -30,7 +27,8 @@ shinyServer(function(input, output, session) {
       if(nrow(Events)!=0){
         Events%>%
           DT::datatable(rownames = FALSE, filter = "none")
-      }}
+      }}else{a[0,] %>%
+          DT::datatable(rownames = FALSE, filter = "none")}
   })
   
   
@@ -213,23 +211,28 @@ shinyServer(function(input, output, session) {
   })
   
   output$tablaCargada <- renderDataTable({
-    datatable(archivo_cargado())
+    if(!is.null(archivo_cargado())){
+      datatable(archivo_cargado())
+    }
   })
   
   mergedLogros <- reactive({
-    deefe <- merge(Logros, archivo_cargado(), by = c("ID","Name", "Team", "Sport", "Games"))
-    return(deefe)
+    if(!is.null(archivo_cargado())){
+      deefe <- merge(Logros, archivo_cargado(), by = c("ID","Name", "Team", "Sport", "Games"))
+      return(deefe)
+    } else{return(NULL)}
   })
   
   output$tablasoloLogros <- renderDataTable({
+    if (!is.null(mergedLogros())){
     df <- mergedLogros() %>%
-      select(Name,Team, Sport, Games,Medal)
-    datatable(df)%>%
+      select(Name,Team, Sport, Games,Medal)%>%
+      DT::datatable()%>%
       formatStyle(columns = "Medal", 
                   background = styleEqual(c('Gold', 'Silver','Bronze'), c("gold", "darkgrey","lightsalmon")))
+    df
+    }
   })
-  
-  
 
 })
 

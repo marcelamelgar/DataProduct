@@ -37,7 +37,7 @@ filteredEquipos <<- Equipos %>%
 shinyUI(fluidPage(theme = shinytheme("sandstone"),
 
     navbarPage("Juegos Olimpicos",
-               tabPanel("Eventos",
+               tabPanel("Eventos", icon = icon("fa-thin fa-flag"),
                         sidebarLayout(
                           sidebarPanel(
                             h2('Eventos Olimpicos'),
