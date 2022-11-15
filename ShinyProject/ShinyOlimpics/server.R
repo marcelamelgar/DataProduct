@@ -86,11 +86,7 @@ shinyServer(function(input, output, session) {
 
   
   #### ATLETAS ####
-  
-  observeEvent(input$season,{
-    updateSelectInput(session, "sport",choices = unique(athlete_events[athlete_events$Season%in%input$season,"Sport"]),
-                      selected = NULL)
-  })
+
   
   atletas <- reactive({
     sex <<- NULL
