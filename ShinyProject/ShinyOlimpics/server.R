@@ -2,7 +2,6 @@ library(shiny)
 library(DT)
 library(dplyr)
 library(rsconnect)
-library(tidyverse)
 library(ggplot2)
 library(readr)
 
@@ -12,25 +11,33 @@ shinyServer(function(input, output, session) {
   athlete_events <<- read.csv("https://raw.githubusercontent.com/marcelamelgar/DataProduct/main/ShinyProject/ShinyOlimpics/athlete_events.csv")
   
   #### EVENTOS ####
-  output$tablaEventos <- renderDataTable({
-    Events <- NULL
-    a <- athlete_events%>%
-      select(Year,Season,City)
-    
-    if(!is.null(input$ChooseYear)&!is.null(input$chkboxSeason)){
-      Events <- athlete_events%>%
+  eventos <- reactive({
+    if (!is.null(input$ChooseYear)&!is.null(input$chkboxSeason)){
+      Events <<- athlete_events%>%
         distinct(City, Year, Season)%>%
         arrange(Year)%>%
         filter(Year >= input$ChooseYear[1] & Year <= input$ChooseYear[2]) %>%
         filter(Season==input$chkboxSeason)
-      
-      if(nrow(Events)!=0){
-        Events%>%
-          DT::datatable(rownames = FALSE, filter = "none")
-      }}else{a[0,] %>%
-          DT::datatable(rownames = FALSE, filter = "none")}
+      return(Events)
+    } else{return(Events <<- NULL)}
   })
   
+  output$tablaEventos <- DT::renderDataTable({
+    eventos()
+    if(!is.null(Events)){
+      Events%>%
+        DT::datatable(filter = "none", 
+                      rownames = FALSE,
+                      options = list(pageLength = 5, scrollX=TRUE))
+      }else{
+        a <- athlete_events%>%
+          select(Year,Season,City)
+        a[0,]%>%
+          DT::datatable(filter = "none", 
+                        rownames = FALSE,
+                        options = list(pageLength = 5,scrollX=TRUE))
+      }
+  })
   
   observeEvent(input$clean,{
     updateSliderInput(session, 'ChooseYear', value = c(min(athlete_events$Year), max(athlete_events$Year)))
@@ -48,7 +55,6 @@ shinyServer(function(input, output, session) {
   
   observe({
     team <- input$chooseTeam
-    
     if(session$clientData$url_port==''){
       x <- NULL
     } else {
@@ -65,18 +71,18 @@ shinyServer(function(input, output, session) {
     updateTextInput(session,"url_param",value = marcador)
   })
   
-  output$tablaEquipos <- renderDataTable({
-    
-    
-    
+  output$tablaEquipos <- DT::renderDataTable({
     dt <- Equipos %>%
-      filter(NOC %in% input$chooseTeam)
-    dt
+      filter(input$chooseTeam == NOC)
+    dt%>%
+      DT::datatable(filter = "none", 
+                    rownames = FALSE,
+                    options = list(pageLength = 5,scrollX=TRUE))
   })
   
   output$plotEquipos <- renderPlot({
     df <- filteredEquipos %>%
-      filter(NOC %in% input$chooseTeam)
+      filter(input$chooseTeam==NOC)
 
     ggplot(df, aes(x="", y=participaciones, fill=Sport)) +
       geom_bar(stat="identity", width=1, color="white") +
@@ -86,7 +92,13 @@ shinyServer(function(input, output, session) {
 
   
   #### ATLETAS ####
-
+  observeEvent(input$season,{
+    updateSelectInput(session, 'sport', 
+                      choices = unique(athlete_events$Sport[athlete_events$Season == input$season]), 
+                      selected = NULL)
+    updateNumericInput(session, 'year', value = unique(athlete_events$Year[athlete_events$Season == input$season])[1])
+  })
+  
   
   atletas <- reactive({
     sex <<- NULL
@@ -106,10 +118,12 @@ shinyServer(function(input, output, session) {
   
   output$plotSexo <- renderPlot({
     atletas()
-    if (nrow(sex)!=0){
+    if (nrow(sex)>1){
       barplot(table(sex$Sex), main = "Cantidad de atletas",
-              names.arg = c("Mujeres","Hombres"), col = c("pink","lightblue"),
+              names.arg = rownames(table(sex$Sex)), col = rainbow(nrow(table(sex$Sex))),
               horiz = TRUE)
+    } else{
+        print("No hay datos")
     }
   })
   
@@ -119,32 +133,42 @@ shinyServer(function(input, output, session) {
       hist(age$Age, main = "Distribución de edades", 
            xlab = "Edad", col = "lightblue", 
            breaks = seq(min(age$Age), max(age$Age), length.out = 6))
-    }
+    }else{renderPrint({
+        print("No hay datos")})}
+  })
+ 
+  atls <- reactive({
+    if (!is.null(input$filterSport[1]) & !is.null(input$filterTeam[1])){
+      atlsdf <<-  mergedAtletas %>%
+        filter(participacion >= input$ChooseParticipation[1] & participacion <= input$ChooseParticipation[2])%>%
+        filter(Sport %in% input$filterSport)%>%
+        filter(Team  %in% input$filterTeam)
+    return(atlsdf)
+    }else{atlsdf <<- NULL}
   })
   
-  Atletas <- athlete_events %>%
-    distinct(ID, Name, Sex,Sport, Team,Age,Games)
-  Atletas
   
-  countAtletas <- Atletas %>%
-    select(Name, Games) %>%
-    group_by(Name)%>%
-    summarise(participacion = n_distinct(Games))
-  countAtletas
+  output$tablaAtletas <- DT::renderDataTable({
+    atls()
+    if(!is.null(atlsdf)){
+      atlsdf%>%
+        DT::datatable(rownames = FALSE,
+                     filter = 'none',
+                     options = list(scrollX=TRUE,
+                                    pageLength = 10),
+                     selection = "multiple")
+    }else{
+      mergedAtletas[0,]%>%
+        DT::datatable(filter = "none", 
+                      rownames = FALSE,
+                      options = list(pageLength = 5,scrollX=TRUE))}
+  })
 
-  mergedAtletas <-merge(Atletas, countAtletas, by="Name")
-  
-  output$tablaAtletas <- renderDataTable({
-    mergedAtletas %>%
-      filter(participacion >= input$ChooseParticipation[1] & participacion <= input$ChooseParticipation[2])%>%
-      filter(Sport %in% input$filterSport)%>%
-      filter(Team %in% input$filterTeam)%>%
-      DT::datatable(options = list(scrollX = TRUE))
-  })
-  
-  output$selectedAtletas <- renderDataTable({
-    mergedAtletas[input$tablaAtletas_rows_selected,] %>%
-      datatable(extensions = "Buttons", 
+  output$selectedAtletas <- DT::renderDataTable({
+    atlsdf[input$tablaAtletas_rows_selected,] %>%
+      datatable(extensions = "Buttons",
+                rownames = FALSE,
+                filter = "none",
                 options = list(paging = TRUE,
                                scrollX=TRUE, 
                                searching = TRUE,
@@ -178,21 +202,17 @@ shinyServer(function(input, output, session) {
     medallas()
     if(nrow(logros)!=0){
       barplot(logros,
-              col = c("gray"),
+              col = c("lightblue"),
               main = "Medallas obtenidas",
               xlab = "Medalla",
               ylab = "Cantidad",
               legend.text = rownames(logros),
               args.legend = list(x = "topright",
                                  inset = c(-0.1, -0.45)))
-    } else {
-      output$extra <- renderText(input$clean2)
+    } else {renderPrint("No hay datos")
     }
   })
   
-  
-  Logros <- athlete_events %>%
-    select(Team, NOC, Year, Sport, Event, Medal, Name, ID,Games)
   
   
   archivo_cargado <- reactive({
@@ -203,28 +223,32 @@ shinyServer(function(input, output, session) {
       out <- read_csv(contenido_archivo$datapath)
       return(out)
     }
-    return(NULL)
   })
   
-  output$tablaCargada <- renderDataTable({
+  output$tablaCargada <- DT::renderDataTable({
     if(!is.null(archivo_cargado())){
-      datatable(archivo_cargado())
-    }
+      DT::datatable(archivo_cargado(), rownames = FALSE, filter = "none", options = list(pageLength = 10,
+                                                                       scrollX = TRUE))
+    } else{ return(NULL)}
+    
   })
   
   mergedLogros <- reactive({
     if(!is.null(archivo_cargado())){
+      Logros <- athlete_events%>%
+        select(ID, Name, Team, Sport, Games, Medal)
       deefe <- merge(Logros, archivo_cargado(), by = c("ID","Name", "Team", "Sport", "Games"))
       return(deefe)
     } else{return(NULL)}
   })
   
-  output$tablasoloLogros <- renderDataTable({
+  output$tablasoloLogros <- DT::renderDataTable({
     if (!is.null(mergedLogros())){
     df <- mergedLogros() %>%
       select(Name,Team, Sport, Games,Medal)%>%
-      DT::datatable()%>%
-      formatStyle(columns = "Medal", 
+      DT::datatable(rownames = FALSE, filter = "none", options = list(pageLenght=5,
+                                                                      scrollX = TRUE))%>%
+      formatStyle(columns = "Medal",
                   background = styleEqual(c('Gold', 'Silver','Bronze'), c("gold", "darkgrey","lightsalmon")))
     df
     }

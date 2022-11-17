@@ -34,7 +34,7 @@ filteredEquipos <<- Equipos %>%
 
 #UI app
 
-shinyUI(fluidPage(theme = shinytheme("sandstone"),
+shinyUI(fluidPage(
 
     navbarPage("Juegos Olimpicos",
                tabPanel("Eventos", icon = icon("fa-thin fa-flag"),
@@ -55,7 +55,7 @@ shinyUI(fluidPage(theme = shinytheme("sandstone"),
                             actionButton("clean","Limpiar")
                           ),
                           mainPanel(
-                            dataTableOutput("tablaEventos")
+                            DT::dataTableOutput("tablaEventos")
                           )
                         )
                ),
@@ -74,7 +74,7 @@ shinyUI(fluidPage(theme = shinytheme("sandstone"),
                           h2("Equipos Olimpicos"),
                           fluidRow(
                               column(12,
-                                     dataTableOutput("tablaEquipos")
+                                     DT::dataTableOutput("tablaEquipos")
                                      )
                             ),
                           br(),br(),
@@ -112,13 +112,13 @@ shinyUI(fluidPage(theme = shinytheme("sandstone"),
                             tabsetPanel(
                               tabPanel(
                                 "Informacion General",
-                                h2("Informacion Atletas"),
+                                h3("Informacion Atletas"),
                                 fluidRow(
-                                  column(12, dataTableOutput('tablaAtletas'))
+                                  column(12,DT::dataTableOutput('tablaAtletas'))
                                 ),
                                 fluidRow(
-                                  h3("Seleccion de Atletas"),
-                                  column(12, dataTableOutput('selectedAtletas'))
+                                  h3("Atletas seleccionados"),
+                                  column(12, DT::dataTableOutput('selectedAtletas'))
                                 )
                               ),
                               tabPanel(
@@ -140,10 +140,12 @@ shinyUI(fluidPage(theme = shinytheme("sandstone"),
                                 fluidRow(
                                   column(6, 
                                          h4("Grafica Sexo"),
-                                         plotOutput('plotSexo')),
+                                         plotOutput('plotSexo'),
+                                         verbatimTextOutput("opcionalA")),
                                   column(6,
                                          h4("Grafica Edades"),
-                                         plotOutput('plotEdades'))
+                                         plotOutput('plotEdades'),
+                                         verbatimTextOutput("opcionalB"))
                                 )
                               )
                             )
@@ -174,7 +176,7 @@ shinyUI(fluidPage(theme = shinytheme("sandstone"),
                                  "Medallas",
                                  h3("Resultados del equipo"),
                                  fluidRow(
-                                   column(12, plotOutput('plotlogros'),textOutput("extra"))
+                                   column(12, plotOutput('plotlogros'))
                                  )
                                ),
                                tabPanel(
@@ -188,12 +190,12 @@ shinyUI(fluidPage(theme = shinytheme("sandstone"),
                                  ),
                                  fluidRow(
                                    column(12,
-                                          dataTableOutput('tablaCargada'))
+                                          DT::dataTableOutput('tablaCargada'))
                                  ),
                                  h2("Logros alcanzados por Atletas seleccionados"),
                                  fluidRow(
                                    column(12,
-                                          dataTableOutput('tablasoloLogros'))
+                                          DT::dataTableOutput('tablasoloLogros'))
                                  )
                                )
                              )
