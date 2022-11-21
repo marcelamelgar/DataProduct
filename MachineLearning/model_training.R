@@ -60,9 +60,6 @@ predict <- predict(tb_model, test_data, type="raw")
 predict_probs <- predict(tb_model, test_data, type="prob")
 predictions <- cbind(predict, predict_probs)
 
-predict1 <- predict(tb_model, test_data, type="raw")
-predict_probs <- predict(tb_model, test_data, type="prob")
-predictions <- cbind(predict1, predict_probs)
 
 #             Evaluate Confusion Matrix
 #------------------------------------------------------------

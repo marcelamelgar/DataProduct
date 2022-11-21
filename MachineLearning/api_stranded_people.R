@@ -34,9 +34,7 @@ model <- readr::read_rds("tb_model.rds")
 model$modelInfo
 
 #* Procesamiento de data individual
-#* @post /predict1
 
-#* Prediccion de Sobrevivencia de un Pasajero
 #* @param stranded_class si el paciente se encontraba atado
 #* @param age edad del paciente
 #* @param care_home_ref_flag si fue referido de una casa hogar
@@ -46,6 +44,7 @@ model$modelInfo
 #* @param previous_care_in_last_12_month si ha contado con cuidados medicos recientemente
 #* @param admit_date fecha de ingreso al hospital
 #* @param frail_descrip fragilidad del paciente
+#* @post /predict1
 
 function(stranded_class, age, care_home_ref_flag, medically_safe_flag, hcop_flag, needs_mental_health_support_flag,
          previous_care_in_the_last_12_month, admit_date, frail_descrip){
